@@ -78,16 +78,21 @@
       min-width: 200px;
       z-index: 10;
     }
-    .help-menu a {
+    .help-menu a, .help-menu button {
       color: #4ecdc4;
       text-decoration: none;
+      background: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      display: block;
+      width: 100%;
+      text-align: left;
     }
-    .help-menu a:hover {
+    .help-menu a:hover, .help-menu button:hover {
       text-decoration: underline;
-    }
-    .help-menu .version {
-      font-size: 0.95em;
-      color: #aaa;
     }
     body.light {
       background: #fff;
@@ -277,7 +282,7 @@
               <button @click="fileAction('Save')">Save</button>
               <button @click="fileAction('Close')">Close</button>
               <div class="dropdown-separator"></div>
-              <button @click="fileAction('Settings')">Settings</button>
+              <button @click="openSettingsTab">Settings</button>
               <div class="dropdown-separator"></div>
               <button @click="fileAction('Exit')">Exit</button>
             </div>
@@ -290,9 +295,7 @@
               <div style="margin-bottom:8px;">
                 <a href="https://example.com/user-manual" target="_blank">User Manual</a>
               </div>
-              <div class="version">
-                Version: <span id="appVersion">1.0.0</span>
-              </div>
+              <button @click="openAboutTab">About</button>
             </div>
           </div>
         </div>
@@ -325,6 +328,7 @@
       <!-- Tab Content or No Tabs Message -->
       <div v-if="tabs.length" class="tab-content" :class="{light: theme === 'light'}">
         <span v-if="activeTab === 'About'">About this app: version 1.0.0</span>
+        <span v-else-if="activeTab === 'Settings'">Settings tab (dummy content)</span>
         <span v-else>Tab: {{ activeTab }}</span>
       </div>
       <div v-else class="no-tabs-message">
@@ -343,8 +347,8 @@
           helpMenuOpen: false,
           fileMenuOpen: false,
           showWelcome: true,
-          tabs: ['About'],
-          activeTab: 'About',
+          tabs: [],
+          activeTab: '',
           draggingTab: null,
           dragOverTab: null,
         }
@@ -427,6 +431,20 @@
         onTabDragEnd() {
           this.draggingTab = null;
           this.dragOverTab = null;
+        },
+        openAboutTab() {
+          if (!this.tabs.includes('About')) {
+            this.tabs.push('About');
+          }
+          this.activeTab = 'About';
+          this.helpMenuOpen = false;
+        },
+        openSettingsTab() {
+          if (!this.tabs.includes('Settings')) {
+            this.tabs.push('Settings');
+          }
+          this.activeTab = 'Settings';
+          this.fileMenuOpen = false;
         },
         randomBetween(a, b) {
           return a + Math.random() * (b - a);
