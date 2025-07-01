@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Random Waves & Shapes Background</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+      background: #111;
+      color: #fff;
+    }
+    #app {
+      height: 100vh;
+      width: 100vw;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      height: 56px;
+      background: #222;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 2;
+    }
+    .toolbar .menu {
+      margin-right: auto;
+      display: flex;
+      gap: 20px;
+    }
+    .toolbar .menu button {
+      background: none;
+      border: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .toolbar .menu button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .toolbar .theme-toggle {
+      margin-left: 20px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: none;
+      background: #444;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .toolbar .theme-toggle.light {
+      background: #ddd;
+      color: #222;
+    }
+    .help-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: #333;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      min-width: 200px;
+      z-index: 10;
+    }
+    .help-menu a {
+      color: #4ecdc4;
+      text-decoration: none;
+    }
+    .help-menu a:hover {
+      text-decoration: underline;
+    }
+    .help-menu .version {
+      font-size: 0.95em;
+      color: #aaa;
+    }
+    body.light {
+      background: #fff;
+      color: #222;
+    }
+    body.light .toolbar {
+      background: #f5f5f5;
+      color: #222;
+    }
+    body.light .toolbar .theme-toggle {
+      background: #ddd;
+      color: #222;
+    }
+    /* Ensure Help menu is above canvas */
+    #bgCanvas {
+      z-index: -1;
+    }
+    .welcome-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(20, 20, 30, 0.97);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s;
+    }
+    .welcome-overlay h1 {
+      font-size: 2.5em;
+      margin-bottom: 0.5em;
+    }
+    .welcome-overlay p {
+      font-size: 1.2em;
+      margin-bottom: 2em;
+      color: #aaa;
+    }
+    .welcome-overlay button {
+      font-size: 1.1em;
+      padding: 12px 32px;
+      border-radius: 6px;
+      border: none;
+      background: #4ecdc4;
+      color: #222;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .welcome-overlay button:hover {
+      background: #38b6a3;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #222;
+      color: #fff;
+      min-width: 140px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 20;
+      padding: 6px 0;
+      font-size: 1em;
+    }
+    .dropdown-menu.show {
+      display: block;
+    }
+    .dropdown-menu button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: inherit;
+      text-align: left;
+      padding: 8px 20px;
+      font: inherit;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.2s;
+    }
+    .dropdown-menu button:hover {
+      background: #333;
+    }
+    .dropdown-separator {
+      height: 1px;
+      background: #000;
+      margin: 6px 0;
+      border: none;
+    }
+  </style>
+</head>
+<body :class="{light: theme === 'light'}">
+  <div id="app">
+    <div v-if="showWelcome" class="welcome-overlay">
+      <h1>Welcome!</h1>
+      <p>Enjoy a randomly generated digital art background.<br>
+         Use the toolbar above to change theme or get help.</p>
+      <button @click="enterApp">Enter</button>
+    </div>
+    <div v-else>
+      <div class="toolbar" :class="{light: theme === 'light'}">
+        <div class="menu">
+          <div style="position:relative;display:inline-block;">
+            <button @click.stop="toggleFileMenu">File</button>
+            <div class="dropdown-menu" :class="{show: fileMenuOpen}" @click.stop>
+              <button @click="fileAction('New')">New</button>
+              <button @click="fileAction('Open')">Open</button>
+              <button @click="fileAction('Save')">Save</button>
+              <button @click="fileAction('Close')">Close</button>
+              <div class="dropdown-separator"></div>
+              <button @click="fileAction('Settings')">Settings</button>
+              <div class="dropdown-separator"></div>
+              <button @click="fileAction('Exit')">Exit</button>
+            </div>
+          </div>
+          <button @click="noop">Edit</button>
+          <button @click="noop">View</button>
+          <div style="position:relative;display:inline-block;">
+            <button id="helpBtn" @click.stop="toggleHelpMenu">Help</button>
+            <div id="helpMenu" class="help-menu" :style="{display: helpMenuOpen ? 'block' : 'none'}" @click.stop>
+              <div style="margin-bottom:8px;">
+                <a href="https://example.com/user-manual" target="_blank">User Manual</a>
+              </div>
+              <div class="version">
+                Version: <span id="appVersion">1.0.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="theme-toggle" :class="{light: theme === 'light'}" @click="toggleTheme">
+          {{ theme === 'dark' ? '🌙 Dark' : '🌞 Light' }}
+        </button>
+      </div>
+      <canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;"></canvas>
+    </div>
+  </div>
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          theme: localStorage.getItem('theme') || 'dark',
+          helpMenuOpen: false,
+          fileMenuOpen: false,
+          showWelcome: true,
+        }
+      },
+      mounted() {
+        if (!this.showWelcome) {
+          this.drawBackground();
+        }
+        window.addEventListener('resize', this.drawBackground);
+        document.addEventListener('click', this.closeMenus);
+        document.body.classList.toggle('light', this.theme === 'light');
+      },
+      watch: {
+        theme(newTheme) {
+          localStorage.setItem('theme', newTheme);
+          document.body.classList.toggle('light', newTheme === 'light');
+          this.drawBackground();
+        },
+        showWelcome(newVal) {
+          if (!newVal) {
+            this.$nextTick(() => this.drawBackground());
+          }
+        }
+      },
+      methods: {
+        noop() {},
+        toggleTheme() {
+          this.theme = this.theme === 'dark' ? 'light' : 'dark';
+        },
+        toggleHelpMenu() {
+          this.helpMenuOpen = !this.helpMenuOpen;
+          this.fileMenuOpen = false;
+        },
+        toggleFileMenu() {
+          this.fileMenuOpen = !this.fileMenuOpen;
+          this.helpMenuOpen = false;
+        },
+        closeMenus() {
+          this.helpMenuOpen = false;
+          this.fileMenuOpen = false;
+        },
+        enterApp() {
+          this.showWelcome = false;
+        },
+        fileAction(action) {
+          alert(`You selected: ${action}`);
+          this.fileMenuOpen = false;
+        },
+        randomBetween(a, b) {
+          return a + Math.random() * (b - a);
+        },
+        drawBackground() {
+          if (this.showWelcome) return;
+          const canvas = document.getElementById('bgCanvas');
+          if (!canvas) return;
+          const ctx = canvas.getContext('2d');
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+
+          const darkColors = ['#0f2027', '#2c5364', '#1a2980', '#000428', '#283e51', '#444', '#222'];
+          const lightColors = ['#f8ffae', '#43cea2', '#185a9d', '#f7971e', '#ffd200', '#fff', '#eee'];
+          const colors = this.theme === 'dark' ? darkColors : lightColors;
+
+          ctx.fillStyle = this.theme === 'dark' ? '#111' : '#fff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Draw random waves
+          for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            const amplitude = this.randomBetween(30, 80);
+            const frequency = this.randomBetween(0.004, 0.012);
+            const phase = this.randomBetween(0, Math.PI * 2);
+            const yOffset = (canvas.height / 6) * (i + 1) + this.randomBetween(-30, 30);
+            ctx.moveTo(0, yOffset);
+            for (let x = 0; x <= canvas.width; x++) {
+              const y = yOffset + Math.sin(x * frequency + phase) * amplitude;
+              ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = colors[i % colors.length];
+            ctx.lineWidth = this.randomBetween(2, 5);
+            ctx.globalAlpha = 0.5 + Math.random() * 0.5;
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+
+          // Draw random shapes (circles)
+          for (let i = 0; i < 10; i++) {
+            ctx.beginPath();
+            const x = this.randomBetween(0, canvas.width);
+            const y = this.randomBetween(0, canvas.height);
+            const radius = this.randomBetween(20, 80);
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = colors[Math.floor(this.randomBetween(0, colors.length))];
+            ctx.globalAlpha = 0.1 + Math.random() * 0.2;
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
