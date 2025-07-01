@@ -188,6 +188,7 @@
       padding-left: 16px;
       z-index: 1;
       position: relative;
+      user-select: none;
     }
     .tab-bar.light {
       background: #eaeaea;
@@ -208,6 +209,7 @@
       transition: color 0.2s, border-bottom 0.2s, background 0.2s;
       position: relative;
       margin-right: 2px;
+      opacity: 1;
     }
     .tab.active {
       color: #fff;
@@ -233,6 +235,12 @@
     }
     .tab .close-icon:hover {
       color: #e74c3c;
+    }
+    .tab.dragging {
+      opacity: 0.5;
+    }
+    .tab.drag-over {
+      border-left: 2px solid #4ecdc4;
     }
     .tab-content {
       padding: 24px;
@@ -298,8 +306,13 @@
           v-for="(tab, idx) in tabs"
           :key="tab"
           class="tab"
-          :class="{active: activeTab === tab}"
+          :class="[{active: activeTab === tab}, {dragging: draggingTab === idx}, { 'drag-over': dragOverTab === idx }]"
           @click="setActiveTab(tab)"
+          draggable="true"
+          @dragstart="onTabDragStart(idx, $event)"
+          @dragover.prevent="onTabDragOver(idx, $event)"
+          @drop.prevent="onTabDrop(idx, $event)"
+          @dragend="onTabDragEnd"
         >
           {{ tab }}
           <span
@@ -332,6 +345,8 @@
           showWelcome: true,
           tabs: ['About'],
           activeTab: 'About',
+          draggingTab: null,
+          dragOverTab: null,
         }
       },
       mounted() {
@@ -387,6 +402,31 @@
           if (this.activeTab === tab) {
             this.activeTab = this.tabs[0] || '';
           }
+        },
+        // Drag and drop logic for tabs
+        onTabDragStart(idx, e) {
+          this.draggingTab = idx;
+          e.dataTransfer.effectAllowed = 'move';
+        },
+        onTabDragOver(idx, e) {
+          if (this.draggingTab === null || this.draggingTab === idx) return;
+          this.dragOverTab = idx;
+        },
+        onTabDrop(idx, e) {
+          if (this.draggingTab === null || this.draggingTab === idx) return;
+          const draggedTab = this.tabs[this.draggingTab];
+          this.tabs.splice(this.draggingTab, 1);
+          this.tabs.splice(idx, 0, draggedTab);
+          // Update activeTab if needed
+          if (this.activeTab === draggedTab) {
+            this.activeTab = draggedTab;
+          }
+          this.draggingTab = null;
+          this.dragOverTab = null;
+        },
+        onTabDragEnd() {
+          this.draggingTab = null;
+          this.dragOverTab = null;
         },
         randomBetween(a, b) {
           return a + Math.random() * (b - a);
