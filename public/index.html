@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Waves & Shapes Background</title>
+  <title>Guichem Suite Web</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
@@ -105,6 +105,55 @@
     body.light .toolbar .theme-toggle {
       background: #ddd;
       color: #222;
+    }
+    /* Light theme sidebar styles */
+    body.light .sidebar {
+      background: #f5f5f5;
+      color: #222;
+      border-right: 1px solid #ccc;
+    }
+    body.light .sidebar-bar {
+      background: #eaeaea;
+      border-bottom: 1px solid #ccc;
+    }
+    body.light .sidebar-bar button {
+      background: #ddd;
+      color: #222;
+    }
+    body.light .sidebar-bar button:hover {
+      background: #ccc;
+    }
+    body.light .sidebar-bar button:disabled {
+      background: #eee;
+      color: #999;
+    }
+    body.light .sidebar-bar button:disabled:hover {
+      background: #eee;
+    }
+    body.light .sidebar-file {
+      color: #222;
+    }
+    body.light .sidebar-file:hover {
+      background: #e0e0e0;
+    }
+    body.light .sidebar-file.selected {
+      background: #4ecdc4;
+      color: #fff;
+    }
+    body.light .sidebar-empty {
+      color: #666;
+    }
+    body.light .order-menu {
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      color: #222;
+    }
+    body.light .order-menu div:hover {
+      background: #e0e0e0;
+    }
+    body.light .tooltip {
+      background: #333;
+      color: #fff;
     }
     /* Ensure Help menu is above canvas */
     #bgCanvas {
@@ -377,8 +426,7 @@
   <div id="app">
     <div v-if="showWelcome" class="welcome-overlay">
       <h1>Welcome!</h1>
-      <p>Enjoy a randomly generated digital art background.<br>
-         Use the toolbar above to change theme or get help.</p>
+      <p>This is the Guichem Suite Web.<br>It is a collection of tools for Chemical Engineering.<br> Use the toolbar above to change theme or get help.</p>
       <button @click="enterApp">Enter</button>
     </div>
     <div v-else style="display: flex; flex-direction: column; height: 100vh;">
