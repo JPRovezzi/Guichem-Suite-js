@@ -31,7 +31,7 @@
       color: #fff;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       position: relative;
-      z-index: 2;
+      z-index: 10;
     }
     .toolbar .menu {
       margin-right: auto;
@@ -76,7 +76,7 @@
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       min-width: 200px;
-      z-index: 10;
+      z-index: 30;
     }
     .help-menu a, .help-menu button {
       color: #4ecdc4;
@@ -155,7 +155,7 @@
       min-width: 140px;
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      z-index: 20;
+      z-index: 30;
       padding: 6px 0;
       font-size: 1em;
     }
@@ -268,7 +268,6 @@
       display: flex;
       flex-direction: column;
       border-right: 1px solid #333;
-      height: 100vh;
       min-width: 180px;
       z-index: 3;
     }
@@ -285,15 +284,47 @@
       color: #fff;
       border: none;
       border-radius: 4px;
-      padding: 4px 10px;
+      padding: 8px;
       cursor: pointer;
-      font-size: 1em;
+      font-size: 1.2em;
       transition: background 0.2s;
+      position: relative;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-bar button:hover {
+      background: #555;
     }
     .sidebar-bar button:disabled {
       background: #333;
       color: #888;
       cursor: not-allowed;
+    }
+    .sidebar-bar button:disabled:hover {
+      background: #333;
+    }
+    .tooltip {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .sidebar-bar button:hover .tooltip {
+      opacity: 1;
     }
     .order-menu-wrapper {
       position: relative;
@@ -350,73 +381,91 @@
          Use the toolbar above to change theme or get help.</p>
       <button @click="enterApp">Enter</button>
     </div>
-    <div v-else style="display: flex; height: 100vh;">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="sidebar-bar">
-          <button @click="loadFile">Load</button>
-          <button :disabled="!selectedFile" @click="deleteFile">Delete</button>
-          <button :disabled="!selectedFile" @click="renameFile">Rename</button>
-          <button :disabled="!selectedFile" @click="duplicateFile">Duplicate</button>
-          <div class="order-menu-wrapper">
-            <button @click="toggleOrderMenu">Order</button>
-            <div v-if="orderMenuOpen" class="order-menu" @mouseleave="orderMenuOpen = false">
-              <div @click="orderFiles('name', true)">A → Z</div>
-              <div @click="orderFiles('name', false)">Z → A</div>
-              <div @click="orderFiles('ext', true)">Ext ↑</div>
-              <div @click="orderFiles('ext', false)">Ext ↓</div>
+    <div v-else style="display: flex; flex-direction: column; height: 100vh;">
+      <!-- Toolbar -->
+      <div class="toolbar" :class="{light: theme === 'light'}">
+        <div class="menu">
+          <div style="position:relative;display:inline-block;">
+            <button @click.stop="toggleFileMenu">File</button>
+            <div class="dropdown-menu" :class="{show: fileMenuOpen}" @click.stop>
+              <button @click="fileAction('New')">New</button>
+              <button @click="fileAction('Open')">Open</button>
+              <button @click="fileAction('Save')">Save</button>
+              <button @click="fileAction('Close')">Close</button>
+              <div class="dropdown-separator"></div>
+              <button @click="openSettingsTab">Settings</button>
+              <div class="dropdown-separator"></div>
+              <button @click="fileAction('Exit')">Exit</button>
             </div>
           </div>
-        </div>
-        <div class="sidebar-files"
-          @dragover.prevent
-          @drop.prevent="handleFileDrop"
-        >
-          <div
-            v-for="file in files"
-            :key="file.id"
-            :class="['sidebar-file', {selected: selectedFile && selectedFile.id === file.id}]"
-            @click="selectFile(file)"
-          >
-            <span>{{ file.name }}</span>
-          </div>
-          <div v-if="!files.length" class="sidebar-empty">Drop files here or use Load</div>
-        </div>
-        <input ref="fileInput" type="file" style="display:none" @change="handleFileInput" />
-      </div>
-      <!-- Main content (tabs, canvas, etc) -->
-      <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-        <div class="toolbar" :class="{light: theme === 'light'}">
-          <div class="menu">
-            <div style="position:relative;display:inline-block;">
-              <button @click.stop="toggleFileMenu">File</button>
-              <div class="dropdown-menu" :class="{show: fileMenuOpen}" @click.stop>
-                <button @click="fileAction('New')">New</button>
-                <button @click="fileAction('Open')">Open</button>
-                <button @click="fileAction('Save')">Save</button>
-                <button @click="fileAction('Close')">Close</button>
-                <div class="dropdown-separator"></div>
-                <button @click="openSettingsTab">Settings</button>
-                <div class="dropdown-separator"></div>
-                <button @click="fileAction('Exit')">Exit</button>
-              </div>
-            </div>
-            <button @click="noop">Edit</button>
-            <button @click="noop">View</button>
-            <div style="position:relative;display:inline-block;">
-              <button id="helpBtn" @click.stop="toggleHelpMenu">Help</button>
-              <div id="helpMenu" class="help-menu" :style="{display: helpMenuOpen ? 'block' : 'none'}" @click.stop>
-                <div style="margin-bottom:8px;">
-                  <a href="https://example.com/user-manual" target="_blank">User Manual</a>
+          <button @click="noop">Edit</button>
+          <button @click="noop">View</button>
+          <div style="position:relative;display:inline-block;">
+            <button id="helpBtn" @click.stop="toggleHelpMenu">Help</button>
+            <div id="helpMenu" class="help-menu" :style="{display: helpMenuOpen ? 'block' : 'none'}" @click.stop>
+                              <div style="margin-bottom:8px;">
+                  <a href="https://example.com/user-manual" target="_blank" rel="noopener">User Manual</a>
                 </div>
-                <button @click="openAboutTab">About</button>
+              <button @click="openAboutTab">About</button>
+            </div>
+          </div>
+        </div>
+        <button class="theme-toggle" :class="{light: theme === 'light'}" @click="toggleTheme">
+          {{ theme === 'dark' ? '🌙 Dark' : '🌞 Light' }}
+        </button>
+      </div>
+      <!-- Main content area with sidebar and content -->
+      <div style="display: flex; flex: 1; min-height: 0;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-bar">
+            <button @click="loadFile" title="Load File">
+              📁
+              <span class="tooltip">Load File</span>
+            </button>
+            <button :disabled="!selectedFile" @click="deleteFile" title="Delete File">
+              🗑️
+              <span class="tooltip">Delete File</span>
+            </button>
+            <button :disabled="!selectedFile" @click="renameFile" title="Rename File">
+              ✏️
+              <span class="tooltip">Rename File</span>
+            </button>
+            <button :disabled="!selectedFile" @click="duplicateFile" title="Duplicate File">
+              📋
+              <span class="tooltip">Duplicate File</span>
+            </button>
+            <div class="order-menu-wrapper">
+              <button @click="toggleOrderMenu" title="Sort Files">
+                ↕️
+                <span class="tooltip">Sort Files</span>
+              </button>
+              <div v-if="orderMenuOpen" class="order-menu" @mouseleave="orderMenuOpen = false">
+                <div @click="orderFiles('name', true)">A → Z</div>
+                <div @click="orderFiles('name', false)">Z → A</div>
+                <div @click="orderFiles('ext', true)">Ext ↑</div>
+                <div @click="orderFiles('ext', false)">Ext ↓</div>
               </div>
             </div>
           </div>
-          <button class="theme-toggle" :class="{light: theme === 'light'}" @click="toggleTheme">
-            {{ theme === 'dark' ? '🌙 Dark' : '🌞 Light' }}
-          </button>
+          <div class="sidebar-files"
+            @dragover.prevent
+            @drop.prevent="handleFileDrop"
+          >
+            <div
+              v-for="file in files"
+              :key="file.id"
+              :class="['sidebar-file', {selected: selectedFile && selectedFile.id === file.id}]"
+              @click="selectFile(file)"
+            >
+              <span>{{ file.name }}</span>
+            </div>
+            <div v-if="!files.length" class="sidebar-empty">Drop files here or use Load</div>
+          </div>
+          <input ref="fileInput" type="file" style="display:none" @change="handleFileInput" />
         </div>
+        <!-- Main content (tabs, canvas, etc) -->
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
         <!-- Tab Bar -->
         <div v-if="tabs.length" class="tab-bar" :class="{light: theme === 'light'}">
           <button
