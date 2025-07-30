@@ -111,7 +111,7 @@
             </div>
             <div v-if="!files.length" class="sidebar-empty">Drop files here or use Load</div>
           </div>
-          <label for="sidebar-file-input" class="visually-hidden">Load file</label>
+          <!-- Hidden file input for loading files -->
           <input id="sidebar-file-input" ref="fileInput" type="file" class="display-none" @change="handleFileInput" title="Load file" />
         </div>
         <!-- Main content (tabs, canvas, etc) -->
