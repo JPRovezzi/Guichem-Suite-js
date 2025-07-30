@@ -428,25 +428,19 @@ body.light .scrollable-tab-content::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 .sidebar-bar {
-  display: -webkit-box;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 8px;
   background: #191919;
   border-bottom: 1px solid #333;
-}
-.sidebar-bar-row {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-align-items: center;
   align-items: center;
-  gap: 6px;
-  -webkit-justify-content: center;
-  justify-content: center;
+  justify-content: flex-start;
+}
+.sidebar-bar-flex > button,
+.sidebar-bar-flex > .order-menu-wrapper {
+  min-width: 36px;
+  flex: 0 1 36px;
 }
 .sidebar-bar button {
   background: #444;

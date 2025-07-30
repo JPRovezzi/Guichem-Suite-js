@@ -56,45 +56,41 @@
             {{ sidebarCollapsed ? '◀' : '▶' }}
           </button>
           <div class="sidebar-resize-handle" v-if="!sidebarCollapsed" @mousedown="startSidebarResize"></div>
-          <div class="sidebar-bar">
-            <div class="sidebar-bar-row">
-              <button @click="saveFile" :disabled="!selectedFile" title="Save File">
-                💾
-                <span class="tooltip">Save File</span>
+          <div class="sidebar-bar sidebar-bar-flex">
+            <button @click="saveFile" :disabled="!selectedFile" title="Save File">
+              💾
+              <span class="tooltip">Save File</span>
+            </button>
+            <button @click="loadFile" title="Load File">
+              📁
+              <span class="tooltip">Load File</span>
+            </button>
+            <button @click="previewFile" :disabled="!selectedFile" title="Preview File">
+              👁️
+              <span class="tooltip">Preview File</span>
+            </button>
+            <button :disabled="!selectedFile" @click="deleteFile" title="Delete File">
+              🗑️
+              <span class="tooltip">Delete File</span>
+            </button>
+            <button :disabled="!selectedFile" @click="renameFile" title="Rename File">
+              ✏️
+              <span class="tooltip">Rename File</span>
+            </button>
+            <button :disabled="!selectedFile" @click="duplicateFile" title="Duplicate File">
+              📋
+              <span class="tooltip">Duplicate File</span>
+            </button>
+            <div class="order-menu-wrapper">
+              <button @click="toggleOrderMenu" title="Sort Files" :disabled="!files.length">
+                ↕️
+                <span class="tooltip">Sort Files</span>
               </button>
-              <button @click="loadFile" title="Load File">
-                📁
-                <span class="tooltip">Load File</span>
-              </button>
-              <button @click="previewFile" :disabled="!selectedFile" title="Preview File">
-                👁️
-                <span class="tooltip">Preview File</span>
-              </button>
-              <button :disabled="!selectedFile" @click="deleteFile" title="Delete File">
-                🗑️
-                <span class="tooltip">Delete File</span>
-              </button>
-            </div>
-            <div class="sidebar-bar-row">
-              <button :disabled="!selectedFile" @click="renameFile" title="Rename File">
-                ✏️
-                <span class="tooltip">Rename File</span>
-              </button>
-              <button :disabled="!selectedFile" @click="duplicateFile" title="Duplicate File">
-                📋
-                <span class="tooltip">Duplicate File</span>
-              </button>
-              <div class="order-menu-wrapper">
-                <button @click="toggleOrderMenu" title="Sort Files" :disabled="!files.length">
-                  ↕️
-                  <span class="tooltip">Sort Files</span>
-                </button>
-                <div v-if="orderMenuOpen" class="order-menu" @mouseleave="orderMenuOpen = false">
-                  <div @click="orderFiles('name', true)">A → Z</div>
-                  <div @click="orderFiles('name', false)">Z → A</div>
-                  <div @click="orderFiles('ext', true)">Ext ↑</div>
-                  <div @click="orderFiles('ext', false)">Ext ↓</div>
-                </div>
+              <div v-if="orderMenuOpen" class="order-menu" @mouseleave="orderMenuOpen = false">
+                <div @click="orderFiles('name', true)">A → Z</div>
+                <div @click="orderFiles('name', false)">Z → A</div>
+                <div @click="orderFiles('ext', true)">Ext ↑</div>
+                <div @click="orderFiles('ext', false)">Ext ↓</div>
               </div>
             </div>
           </div>
