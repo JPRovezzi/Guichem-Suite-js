@@ -1,3 +1,4 @@
+  // ...existing code...
 // main.js
 
 // Utility: trim file name for tab
@@ -49,6 +50,7 @@ const appOptions = {
       sidebarCollapsed: false,
       sidebarWidth: 220,
       sidebarWidthInput: 220,
+      previewAllowedCache: { textExts: [], imageExts: [], loaded: false },
     }
   },
   computed: {
@@ -57,6 +59,7 @@ const appOptions = {
     }
   },
   mounted() {
+    this.ensurePreviewAllowed();
     if (!this.showWelcome) {
       this.drawBackground();
     }
@@ -76,7 +79,33 @@ const appOptions = {
       }
     }
   },
+  // previewAllowedCache is now in data()
   methods: {
+    async ensurePreviewAllowed() {
+      if (!this.previewAllowedCache.loaded) {
+        const cfg = await fetchPreviewAllowed();
+        this.previewAllowedCache.textExts = cfg.textExts;
+        this.previewAllowedCache.imageExts = cfg.imageExts;
+        this.previewAllowedCache.loaded = true;
+      }
+    },
+    fileIcon(file) {
+      // Use cached previewAllowed if available
+      const ext = (file.ext || '').toLowerCase();
+      const textExts = this.previewAllowedCache.textExts || [];
+      const imageExts = this.previewAllowedCache.imageExts || [];
+      if (textExts.includes(ext)) return '📄';
+      if (imageExts.includes(ext)) return '🖼️';
+      return '❓';
+    },
+    fileIconTitle(file) {
+      const ext = (file.ext || '').toLowerCase();
+      const textExts = this.previewAllowedCache.textExts || [];
+      const imageExts = this.previewAllowedCache.imageExts || [];
+      if (textExts.includes(ext)) return 'Text file';
+      if (imageExts.includes(ext)) return 'Image file';
+      return 'Unknown file type';
+    },
     noop() {},
     startSidebarResize(e) {
       if (this.sidebarCollapsed) return;
