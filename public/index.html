@@ -6,572 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100svh;
-      min-height: 100svh;
-      overflow: hidden;
-      overscroll-behavior: contain;
-    }
-    body {
-      min-height: 100svh;
-      min-width: 100vw;
-      background: #111;
-      color: #fff;
-    }
-    #app {
-      height: 100svh;
-      width: 100vw;
-    }
-    .toolbar {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-align-items: center;
-      align-items: center;
-      padding: 0 20px;
-      height: 56px;
-      background: #222;
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 10;
-    }
-    .toolbar .menu {
-      margin-right: auto;
-      display: flex;
-      gap: 20px;
-    }
-    .toolbar .menu button {
-      background: none;
-      border: none;
-      color: inherit;
-      font: inherit;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .toolbar .menu button:hover {
-      background: rgba(255,255,255,0.1);
-    }
-    .toolbar .theme-toggle {
-      margin-left: 20px;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: none;
-      background: #444;
-      color: #fff;
-      transition: background 0.2s;
-    }
-    .toolbar .theme-toggle.light {
-      background: #ddd;
-      color: #222;
-    }
-    .help-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: #333;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      min-width: 200px;
-      z-index: 30;
-    }
-    .help-menu a, .help-menu button {
-      color: #4ecdc4;
-      text-decoration: none;
-      background: none;
-      border: none;
-      font: inherit;
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
-      display: block;
-      width: 100%;
-      text-align: left;
-    }
-    .help-menu a:hover, .help-menu button:hover {
-      text-decoration: underline;
-    }
-    body.light {
-      background: #fff;
-      color: #222;
-    }
-    body.light .toolbar {
-      background: #f5f5f5;
-      color: #222;
-    }
-    body.light .toolbar .theme-toggle {
-      background: #ddd;
-      color: #222;
-    }
-    /* Light theme sidebar styles */
-    body.light .sidebar {
-      background: #f5f5f5;
-      color: #222;
-      border-right: 1px solid #ccc;
-    }
-    body.light .sidebar-bar {
-      background: #eaeaea;
-      border-bottom: 1px solid #ccc;
-    }
-    body.light .sidebar-bar button {
-      background: #ddd;
-      color: #222;
-    }
-    body.light .sidebar-bar button:hover {
-      background: #ccc;
-    }
-    body.light .sidebar-bar button:disabled {
-      background: #eee;
-      color: #999;
-    }
-    body.light .sidebar-bar button:disabled:hover {
-      background: #eee;
-    }
-    body.light .sidebar-file {
-      color: #222;
-    }
-    body.light .sidebar-file:hover {
-      background: #e0e0e0;
-    }
-    body.light .sidebar-file.selected {
-      background: #4ecdc4;
-      color: #fff;
-    }
-    body.light .sidebar-empty {
-      color: #666;
-    }
-    body.light .order-menu {
-      background: #f5f5f5;
-      border: 1px solid #ccc;
-      color: #222;
-    }
-    body.light .order-menu div:hover {
-      background: #e0e0e0;
-    }
-    body.light .tooltip {
-      background: #333;
-      color: #fff;
-    }
-    body.light .sidebar-toggle {
-      background: #ddd;
-      border: 1px solid #ccc;
-      border-left: none;
-      color: #222;
-    }
-    body.light .sidebar-toggle:hover {
-      background: #ccc;
-    }
-    /* Ensure Help menu is above canvas */
-    #bgCanvas {
-      z-index: -1;
-    }
-    .welcome-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(20, 20, 30, 0.97);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: opacity 0.5s;
-    }
-    .welcome-overlay h1 {
-      font-size: 2.5em;
-      margin-bottom: 0.5em;
-    }
-    .welcome-overlay p {
-      font-size: 1.2em;
-      margin-bottom: 2em;
-      color: #aaa;
-    }
-    .welcome-overlay button {
-      font-size: 1.1em;
-      padding: 12px 32px;
-      border-radius: 6px;
-      border: none;
-      background: #4ecdc4;
-      color: #222;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .welcome-overlay button:hover {
-      background: #38b6a3;
-    }
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: #222;
-      color: #fff;
-      min-width: 140px;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      z-index: 30;
-      padding: 6px 0;
-      font-size: 1em;
-    }
-    .dropdown-menu.show {
-      display: block;
-    }
-    .dropdown-menu button {
-      display: block;
-      width: 100%;
-      background: none;
-      border: none;
-      color: inherit;
-      text-align: left;
-      padding: 8px 20px;
-      font: inherit;
-      cursor: pointer;
-      border-radius: 0;
-      transition: background 0.2s;
-    }
-    .dropdown-menu button:hover {
-      background: #333;
-    }
-    .dropdown-separator {
-      height: 1px;
-      background: #000;
-      margin: 6px 0;
-      border: none;
-    }
-    .tab-bar {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-align-items: center;
-      align-items: center;
-      background: #191919;
-      border-bottom: 1px solid #333;
-      height: 40px;
-      padding-left: 16px;
-      z-index: 1;
-      position: relative;
-      -webkit-user-select: none;
-      user-select: none;
-      
-    }
-    .tab-bar.light {
-      background: #eaeaea;
-      border-bottom: 1px solid #ccc;
-    }
-    .tab {
-      padding: 0 24px 0 16px;
-      height: 100%;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-align-items: center;
-      align-items: center;
-      cursor: pointer;
-      color: #bbb;
-      font-size: 1em;
-      border: none;
-      background: none;
-      outline: none;
-      border-bottom: 2px solid transparent;
-      transition: color 0.2s, border-bottom 0.2s, background 0.2s;
-      position: relative;
-      margin-right: 2px;
-      opacity: 1;
-      touch-action: manipulation;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    .tab.active {
-      color: #fff;
-      border-bottom: 2px solid #4ecdc4;
-      background: #232323;
-    }
-    .tab-bar.light .tab {
-      color: #444;
-      background: none;
-    }
-    .tab-bar.light .tab.active {
-      color: #222;
-      border-bottom: 2px solid #43cea2;
-      background: #f5f5f5;
-    }
-    .tab .close-icon {
-      margin-left: 10px;
-      font-size: 1.1em;
-      color: #888;
-      cursor: pointer;
-      transition: color 0.2s;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    .tab .close-icon:hover {
-      color: #e74c3c;
-    }
-    .tab.dragging {
-      opacity: 0.5;
-    }
-    .tab.drag-over {
-      border-left: 2px solid #4ecdc4;
-    }
-    .tab-content {
-      padding: 24px;
-      color: #fff;
-      font-size: 1.2em;
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-    .tab-content.light {
-      color: #222;
-    }
-    .scrollable-tab-content {
-      overflow: auto;
-      max-height: 100%;
-      max-width: 100%;
-    }
-    /* Custom scrollbar styling for preview area (dark theme) */
-    .scrollable-tab-content::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-    .scrollable-tab-content::-webkit-scrollbar-track {
-      background: #191919;
-      border-radius: 4px;
-    }
-    .scrollable-tab-content::-webkit-scrollbar-thumb {
-      background: #444;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .scrollable-tab-content::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-    /* Custom scrollbar styling for preview area (light theme) */
-    body.light .scrollable-tab-content::-webkit-scrollbar-track {
-      background: #eaeaea;
-    }
-    body.light .scrollable-tab-content::-webkit-scrollbar-thumb {
-      background: #ccc;
-    }
-    body.light .scrollable-tab-content::-webkit-scrollbar-thumb:hover {
-      background: #aaa;
-    }
-    .no-tabs-message {
-      padding: 24px;
-      color: #aaa;
-      font-size: 1.2em;
-      text-align: center;
-    }
-    .sidebar {
-      width: 220px;
-      background: #232323;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid #333;
-      min-width: 180px;
-      z-index: 3;
-      transition: width 0.3s ease, min-width 0.3s ease;
-      position: relative;
-    }
-    .sidebar.collapsed {
-      width: 0;
-      min-width: 0;
-      overflow: hidden;
-    }
-    .sidebar-toggle {
-      position: fixed;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 40px;
-      background: #444;
-      border: 1px solid #333;
-      border-left: none;
-      color: #fff;
-      cursor: pointer;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-align-items: center;
-      align-items: center;
-      -webkit-justify-content: center;
-      justify-content: center;
-      font-size: 12px;
-      transition: background 0.2s, left 0.3s ease;
-      z-index: 100;
-      border-radius: 0 4px 4px 0;
-      touch-action: manipulation;
-    }
-    .sidebar:not(.collapsed) .sidebar-toggle {
-      left: 220px;
-    }
-    .sidebar-toggle:hover {
-      background: #555;
-    }
-
-    .sidebar-bar {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-flex-direction: column;
-      flex-direction: column;
-      gap: 8px;
-      padding: 8px;
-      background: #191919;
-      border-bottom: 1px solid #333;
-    }
-    .sidebar-bar-row {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-align-items: center;
-      align-items: center;
-      gap: 6px;
-      -webkit-justify-content: center;
-      justify-content: center;
-    }
-    .sidebar-bar button {
-      background: #444;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 8px;
-      cursor: pointer;
-      font-size: 1.2em;
-      transition: background 0.2s;
-      position: relative;
-      width: 36px;
-      height: 36px;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-align-items: center;
-      align-items: center;
-      -webkit-justify-content: center;
-      justify-content: center;
-      touch-action: manipulation;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    .sidebar-bar button:hover {
-      background: #555;
-    }
-    .sidebar-bar button:disabled {
-      background: #333;
-      color: #888;
-      cursor: not-allowed;
-    }
-    .sidebar-bar button:disabled:hover {
-      background: #333;
-    }
-    .tooltip {
-      position: absolute;
-      bottom: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #222;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-      z-index: 50;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    .sidebar-bar button:hover .tooltip {
-      opacity: 1;
-    }
-    .order-menu-wrapper {
-      position: relative;
-    }
-    .order-menu {
-      position: absolute;
-      top: 110%;
-      left: 0;
-      background: #222;
-      border: 1px solid #444;
-      border-radius: 4px;
-      min-width: 120px;
-      z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .order-menu div {
-      padding: 8px 12px;
-      cursor: pointer;
-      color: #fff;
-    }
-    .order-menu div:hover {
-      background: #333;
-    }
-    .sidebar-files {
-      -webkit-flex: 1 1 auto;
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 0;
-      overscroll-behavior: contain;
-    }
-    
-    /* Custom scrollbar styling for dark theme */
-    .sidebar-files::-webkit-scrollbar {
-      width: 8px;
-    }
-    .sidebar-files::-webkit-scrollbar-track {
-      background: #191919;
-      border-radius: 4px;
-    }
-    .sidebar-files::-webkit-scrollbar-thumb {
-      background: #444;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .sidebar-files::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-    
-    /* Custom scrollbar styling for light theme */
-    body.light .sidebar-files::-webkit-scrollbar-track {
-      background: #eaeaea;
-    }
-    body.light .sidebar-files::-webkit-scrollbar-thumb {
-      background: #ccc;
-    }
-    body.light .sidebar-files::-webkit-scrollbar-thumb:hover {
-      background: #aaa;
-    }
-    .sidebar-file {
-      padding: 8px 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      margin: 2px 4px;
-      transition: background 0.2s;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .sidebar-file.selected {
-      background: #4ecdc4;
-      color: #222;
-    }
-    .sidebar-empty {
-      color: #888;
-      text-align: center;
-      margin-top: 40px;
-      font-size: 1em;
-    }
-  </style>
+  <link rel="stylesheet" href="main.css">
 </head>
 <body :class="{light: theme === 'light'}">
   <div id="app">
@@ -580,11 +15,11 @@
       <p>This is the Guichem Suite Web.<br>It is a collection of tools for Chemical Engineering.<br> Use the toolbar above to change theme or get help.</p>
       <button @click="enterApp">Enter</button>
     </div>
-    <div v-else style="display: flex; flex-direction: column; height: 100vh;">
+    <div v-else class="flex-col-full">
       <!-- Toolbar -->
       <div class="toolbar" :class="{light: theme === 'light'}">
         <div class="menu">
-          <div style="position:relative;display:inline-block;">
+          <div class="inline-block-rel">
             <button @click.stop="toggleFileMenu">File</button>
             <div class="dropdown-menu" :class="{show: fileMenuOpen}" @click.stop>
               <button @click="fileAction('New')">New</button>
@@ -599,10 +34,10 @@
           </div>
           <button @click="noop">Edit</button>
           <button @click="noop">View</button>
-          <div style="position:relative;display:inline-block;">
+          <div class="inline-block-rel">
             <button id="helpBtn" @click.stop="toggleHelpMenu">Help</button>
             <div id="helpMenu" class="help-menu" :style="{display: helpMenuOpen ? 'block' : 'none'}" @click.stop>
-                              <div style="margin-bottom:8px;">
+              <div class="margin-bottom-8">
                   <a href="https://example.com/user-manual" target="_blank" rel="noopener">User Manual</a>
                 </div>
               <button @click="openAboutTab">About</button>
@@ -614,7 +49,7 @@
         </button>
       </div>
       <!-- Main content area with sidebar and content -->
-      <div style="display: flex; flex: 1; min-height: 0;">
+      <div class="flex-main-content">
         <!-- Sidebar -->
         <div class="sidebar" :class="{collapsed: sidebarCollapsed}">
           <button class="sidebar-toggle" @click="toggleSidebar" :title="sidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar'">
@@ -676,10 +111,11 @@
             </div>
             <div v-if="!files.length" class="sidebar-empty">Drop files here or use Load</div>
           </div>
-          <input ref="fileInput" type="file" style="display:none" @change="handleFileInput" />
+          <label for="sidebar-file-input" class="visually-hidden">Load file</label>
+          <input id="sidebar-file-input" ref="fileInput" type="file" class="display-none" @change="handleFileInput" title="Load file" />
         </div>
         <!-- Main content (tabs, canvas, etc) -->
-        <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:auto;">
+        <div class="flex-main-content-inner">
           <!-- Tab Bar -->
           <div v-if="tabs.length" class="tab-bar" :class="{light: theme === 'light'}">
             <button
@@ -709,7 +145,7 @@
           <div v-else class="no-tabs-message">
             No tabs open.
           </div>
-          <canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;"></canvas>
+          <canvas id="bgCanvas"></canvas>
         </div>
       </div>
     </div>
@@ -771,8 +207,8 @@
       props: ['tab'],
       template: `
         <div>
-          <div style="font-weight:bold;font-size:1.1em;margin-bottom:12px;">{{ tab.title }}</div>
-          <div style="white-space:pre-wrap;word-break:break-word;max-width:100%;overflow:auto;">{{ tab.content }}</div>
+          <div class="font-bold font-1-1em margin-bottom-12">{{ tab.title }}</div>
+          <div class="white-space-pre-wrap word-break-break-word max-width-100 overflow-auto">{{ tab.content }}</div>
         </div>
       `
     });
@@ -781,9 +217,9 @@
       props: ['tab'],
       template: `
         <div>
-          <div style="font-weight:bold;font-size:1.1em;margin-bottom:12px;">{{ tab.title }}</div>
-          <div style="display:flex;align-items:center;justify-content:center;width:100%;overflow:auto;">
-            <img :src="tab.content" style="max-width:100%;max-height:60vh;object-fit:contain;box-shadow:0 2px 8px #0003;border-radius:8px;" />
+          <div class="font-bold font-1-1em margin-bottom-12">{{ tab.title }}</div>
+          <div class="display-flex align-center justify-center max-width-100 overflow-auto">
+            <img :src="tab.content" class="max-width-100 max-height-60vh object-fit-contain box-shadow-img border-radius-8" />
           </div>
         </div>
       `
@@ -793,8 +229,8 @@
       props: ['tab'],
       template: `
         <div>
-          <div style="font-weight:bold;font-size:1.1em;margin-bottom:12px;">{{ tab.title }}</div>
-          <div style="color:#e74c3c;font-size:1.1em;padding:32px 0;white-space:pre-line;">{{ tab.content }}</div>
+          <div class="font-bold font-1-1em margin-bottom-12">{{ tab.title }}</div>
+          <div class="color-e74c3c font-1-1em padding-32-0 white-space-pre-line">{{ tab.content }}</div>
         </div>
       `
     });
