@@ -433,12 +433,12 @@ const appOptions = {
 
 // Dynamically import all tab components and register them, then mount the app
 Promise.all([
-  import('./AboutTab.js'),
-  import('./SettingsTab.js'),
-  import('./GenericTab.js'),
-  import('./PreviewTextTab.js'),
-  import('./PreviewImageTab.js'),
-  import('./PreviewUnsupportedTab.js')
+  import('./tabs/AboutTab.js'),
+  import('./tabs/SettingsTab.js'),
+  import('./tabs/GenericTab.js'),
+  import('./tabs/PreviewTextTab.js'),
+  import('./tabs/PreviewImageTab.js'),
+  import('./tabs/PreviewUnsupportedTab.js')
 ]).then(([AboutTab, SettingsTab, GenericTab, PreviewTextTab, PreviewImageTab, PreviewUnsupportedTab]) => {
   appOptions.components.AboutTab = AboutTab.default;
   appOptions.components.SettingsTab = SettingsTab.default;
