@@ -1,7 +1,7 @@
 // PreviewTextTab.js
 import { defineComponent } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js';
 
-export default defineComponent({
+const PreviewTextTab = defineComponent({
   props: ['tab'],
   template: `
     <div>
@@ -10,3 +10,5 @@ export default defineComponent({
     </div>
   `
 });
+PreviewTextTab.noConfirmClose = true;
+export default PreviewTextTab;

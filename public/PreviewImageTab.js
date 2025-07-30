@@ -1,7 +1,7 @@
 // PreviewImageTab.js
 import { defineComponent } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js';
 
-export default defineComponent({
+const PreviewImageTab = defineComponent({
   props: ['tab'],
   template: `
     <div>
@@ -12,3 +12,5 @@ export default defineComponent({
     </div>
   `
 });
+PreviewImageTab.noConfirmClose = true;
+export default PreviewImageTab;

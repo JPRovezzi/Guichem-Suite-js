@@ -1,7 +1,7 @@
 // PreviewUnsupportedTab.js
 import { defineComponent } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js';
 
-export default defineComponent({
+const PreviewUnsupportedTab = defineComponent({
   props: ['tab'],
   template: `
     <div>
@@ -10,3 +10,5 @@ export default defineComponent({
     </div>
   `
 });
+PreviewUnsupportedTab.noConfirmClose = true;
+export default PreviewUnsupportedTab;

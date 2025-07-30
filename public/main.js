@@ -102,7 +102,10 @@ const appOptions = {
         if (!tab) {
           this.createTab('Untitled', 'generic', 'New tab content');
         } else {
-          const replace = window.confirm(`Replace current tab ('${tab.title}') with a new one? (Cancel to create a new tab)`);
+          const comp = this.$options.components[this.tabComponent(tab)];
+          const replace = comp && comp.noConfirmClose
+            ? true
+            : window.confirm(`Replace current tab ('${tab.title}') with a new one? (Cancel to create a new tab)`);
           if (replace) {
             tab.title = 'Untitled';
             tab.type = 'generic';
@@ -119,7 +122,10 @@ const appOptions = {
         } else {
           const fileName = window.prompt('Enter file name to open:', 'file.txt');
           if (!fileName) return;
-          const replace = window.confirm(`Replace current tab ('${tab.title}') with opened file? (Cancel to open in a new tab)`);
+          const comp = this.$options.components[this.tabComponent(tab)];
+          const replace = comp && comp.noConfirmClose
+            ? true
+            : window.confirm(`Replace current tab ('${tab.title}') with opened file? (Cancel to open in a new tab)`);
           if (replace) {
             tab.title = fileName;
             tab.type = 'generic';
@@ -129,7 +135,8 @@ const appOptions = {
           }
         }
       } else if (action === 'Save') {
-        if (tab) window.alert(`Saved tab: '${tab.title}'`);
+        const comp = tab && this.$options.components[this.tabComponent(tab)];
+        if (tab && !(comp && comp.noConfirmClose)) window.alert(`Saved tab: '${tab.title}'`);
       } else if (action === 'Close') {
         if (tab) await this.closeTab(tab.id);
       } else if (action === 'Exit') {
@@ -150,6 +157,15 @@ const appOptions = {
       const idx = this.tabs.findIndex(t => t.id === tabId);
       if (idx === -1) return;
       const tab = this.tabs[idx];
+      const comp = this.$options.components[this.tabComponent(tab)];
+      if (comp && comp.noConfirmClose) {
+        // No confirmation, just close
+        this.tabs.splice(idx, 1);
+        if (this.activeTab === tabId) {
+          this.activeTab = this.tabs[0]?.id || '';
+        }
+        return;
+      }
       // First, ask if the user wants to close the tab
       const close = window.confirm(`Do you want to close tab: '${tab.title}'?`);
       if (!close) return;
