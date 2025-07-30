@@ -107,6 +107,17 @@ const appOptions = {
       return 'Unknown file type';
     },
     noop() {},
+    trimmedFileName(file) {
+      // Use a dynamic trim length based on sidebar width
+      // 8 chars minimum, 240 max, subtract icon/checkbox space
+      // 80 is for checkbox and icon space
+      const minLen = 8;
+      const maxLen = 240;
+      let px = this.sidebarWidth || 220;
+      let charWidth = 8; // px per char (approx)
+      let trimLen = Math.max(minLen, Math.min(maxLen, Math.floor((px - 80) / charWidth)));
+      return trimFileName(file.name, trimLen);
+    },
     startSidebarResize(e) {
       if (this.sidebarCollapsed) return;
       const sidebar = this.$refs.sidebar;

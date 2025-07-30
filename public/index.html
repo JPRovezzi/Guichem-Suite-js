@@ -112,7 +112,7 @@
                 title="Select file"
               />
               <span class="file-icon" :title="fileIconTitle(file)">{{ fileIcon(file) }}</span>
-              <span>{{ file.name }}</span>
+              <span :title="file.name">{{ trimmedFileName(file) }}</span>
             </div>
             <div v-if="!files.length" class="sidebar-empty">Drop files here or use Load</div>
           </div>
