@@ -84,7 +84,7 @@
                 <span class="tooltip">Duplicate File</span>
               </button>
               <div class="order-menu-wrapper">
-                <button @click="toggleOrderMenu" title="Sort Files">
+                <button @click="toggleOrderMenu" title="Sort Files" :disabled="!files.length">
                   ↕️
                   <span class="tooltip">Sort Files</span>
                 </button>
