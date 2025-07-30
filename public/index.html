@@ -309,9 +309,43 @@
       padding: 24px;
       color: #fff;
       font-size: 1.2em;
+      flex: 1 1 auto;
+      min-height: 0;
     }
     .tab-content.light {
       color: #222;
+    }
+    .scrollable-tab-content {
+      overflow: auto;
+      max-height: 100%;
+      max-width: 100%;
+    }
+    /* Custom scrollbar styling for preview area (dark theme) */
+    .scrollable-tab-content::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    .scrollable-tab-content::-webkit-scrollbar-track {
+      background: #191919;
+      border-radius: 4px;
+    }
+    .scrollable-tab-content::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .scrollable-tab-content::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    /* Custom scrollbar styling for preview area (light theme) */
+    body.light .scrollable-tab-content::-webkit-scrollbar-track {
+      background: #eaeaea;
+    }
+    body.light .scrollable-tab-content::-webkit-scrollbar-thumb {
+      background: #ccc;
+    }
+    body.light .scrollable-tab-content::-webkit-scrollbar-thumb:hover {
+      background: #aaa;
     }
     .no-tabs-message {
       padding: 24px;
@@ -365,11 +399,17 @@
 
     .sidebar-bar {
       display: flex;
-      align-items: center;
-      gap: 6px;
+      flex-direction: column;
+      gap: 8px;
       padding: 8px;
       background: #191919;
       border-bottom: 1px solid #333;
+    }
+    .sidebar-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
     }
     .sidebar-bar button {
       background: #444;
@@ -445,6 +485,34 @@
       overflow-y: auto;
       padding: 8px 0;
     }
+    
+    /* Custom scrollbar styling for dark theme */
+    .sidebar-files::-webkit-scrollbar {
+      width: 8px;
+    }
+    .sidebar-files::-webkit-scrollbar-track {
+      background: #191919;
+      border-radius: 4px;
+    }
+    .sidebar-files::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .sidebar-files::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    
+    /* Custom scrollbar styling for light theme */
+    body.light .sidebar-files::-webkit-scrollbar-track {
+      background: #eaeaea;
+    }
+    body.light .sidebar-files::-webkit-scrollbar-thumb {
+      background: #ccc;
+    }
+    body.light .sidebar-files::-webkit-scrollbar-thumb:hover {
+      background: #aaa;
+    }
     .sidebar-file {
       padding: 8px 16px;
       cursor: pointer;
@@ -513,32 +581,44 @@
             {{ sidebarCollapsed ? '◀' : '▶' }}
           </button>
           <div class="sidebar-bar">
-            <button @click="loadFile" title="Load File">
-              📁
-              <span class="tooltip">Load File</span>
-            </button>
-            <button :disabled="!selectedFile" @click="deleteFile" title="Delete File">
-              🗑️
-              <span class="tooltip">Delete File</span>
-            </button>
-            <button :disabled="!selectedFile" @click="renameFile" title="Rename File">
-              ✏️
-              <span class="tooltip">Rename File</span>
-            </button>
-            <button :disabled="!selectedFile" @click="duplicateFile" title="Duplicate File">
-              📋
-              <span class="tooltip">Duplicate File</span>
-            </button>
-            <div class="order-menu-wrapper">
-              <button @click="toggleOrderMenu" title="Sort Files">
-                ↕️
-                <span class="tooltip">Sort Files</span>
+            <div class="sidebar-bar-row">
+              <button @click="saveFile" :disabled="!selectedFile" title="Save File">
+                💾
+                <span class="tooltip">Save File</span>
               </button>
-              <div v-if="orderMenuOpen" class="order-menu" @mouseleave="orderMenuOpen = false">
-                <div @click="orderFiles('name', true)">A → Z</div>
-                <div @click="orderFiles('name', false)">Z → A</div>
-                <div @click="orderFiles('ext', true)">Ext ↑</div>
-                <div @click="orderFiles('ext', false)">Ext ↓</div>
+              <button @click="loadFile" title="Load File">
+                📁
+                <span class="tooltip">Load File</span>
+              </button>
+              <button @click="previewFile" :disabled="!selectedFile" title="Preview File">
+                👁️
+                <span class="tooltip">Preview File</span>
+              </button>
+              <button :disabled="!selectedFile" @click="deleteFile" title="Delete File">
+                🗑️
+                <span class="tooltip">Delete File</span>
+              </button>
+            </div>
+            <div class="sidebar-bar-row">
+              <button :disabled="!selectedFile" @click="renameFile" title="Rename File">
+                ✏️
+                <span class="tooltip">Rename File</span>
+              </button>
+              <button :disabled="!selectedFile" @click="duplicateFile" title="Duplicate File">
+                📋
+                <span class="tooltip">Duplicate File</span>
+              </button>
+              <div class="order-menu-wrapper">
+                <button @click="toggleOrderMenu" title="Sort Files">
+                  ↕️
+                  <span class="tooltip">Sort Files</span>
+                </button>
+                <div v-if="orderMenuOpen" class="order-menu" @mouseleave="orderMenuOpen = false">
+                  <div @click="orderFiles('name', true)">A → Z</div>
+                  <div @click="orderFiles('name', false)">Z → A</div>
+                  <div @click="orderFiles('ext', true)">Ext ↑</div>
+                  <div @click="orderFiles('ext', false)">Ext ↓</div>
+                </div>
               </div>
             </div>
           </div>
@@ -559,37 +639,38 @@
           <input ref="fileInput" type="file" style="display:none" @change="handleFileInput" />
         </div>
         <!-- Main content (tabs, canvas, etc) -->
-        <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-        <!-- Tab Bar -->
-        <div v-if="tabs.length" class="tab-bar" :class="{light: theme === 'light'}">
-          <button
-            v-for="(tab, idx) in tabs"
-            :key="tab.id"
-            class="tab"
-            :class="[{active: activeTab === tab.id}, {dragging: draggingTab === idx}, { 'drag-over': dragOverTab === idx }]"
-            @click="setActiveTab(tab.id)"
-            draggable="true"
-            @dragstart="onTabDragStart(idx, $event)"
-            @dragover.prevent="onTabDragOver(idx, $event)"
-            @drop.prevent="onTabDrop(idx, $event)"
-            @dragend="onTabDragEnd"
-          >
-            {{ tab.title }}
-            <span
-              class="close-icon"
-              title="Close tab"
-              @click.stop="closeTab(tab.id)"
-            >&#10005;</span>
-          </button>
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:auto;">
+          <!-- Tab Bar -->
+          <div v-if="tabs.length" class="tab-bar" :class="{light: theme === 'light'}">
+            <button
+              v-for="(tab, idx) in tabs"
+              :key="tab.id"
+              class="tab"
+              :class="[{active: activeTab === tab.id}, {dragging: draggingTab === idx}, { 'drag-over': dragOverTab === idx }]"
+              @click="setActiveTab(tab.id)"
+              draggable="true"
+              @dragstart="onTabDragStart(idx, $event)"
+              @dragover.prevent="onTabDragOver(idx, $event)"
+              @drop.prevent="onTabDrop(idx, $event)"
+              @dragend="onTabDragEnd"
+            >
+              {{ tab.title }}
+              <span
+                class="close-icon"
+                title="Close tab"
+                @click.stop="closeTab(tab.id)"
+              >&#10005;</span>
+            </button>
+          </div>
+          <!-- Tab Content or No Tabs Message -->
+          <div v-if="tabs.length" class="tab-content scrollable-tab-content" :class="{light: theme === 'light'}">
+            <component :is="tabComponent(activeTabObj)" :tab="activeTabObj" @save="onTabSave" />
+          </div>
+          <div v-else class="no-tabs-message">
+            No tabs open.
+          </div>
+          <canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;"></canvas>
         </div>
-        <!-- Tab Content or No Tabs Message -->
-        <div v-if="tabs.length" class="tab-content" :class="{light: theme === 'light'}">
-          <component :is="tabComponent(activeTabObj)" :tab="activeTabObj" @save="onTabSave" />
-        </div>
-        <div v-else class="no-tabs-message">
-          No tabs open.
-        </div>
-        <canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;"></canvas>
       </div>
     </div>
   </div>
@@ -606,6 +687,7 @@
       props: ['tab'],
       template: `<div>Settings tab (dummy content)</div>`
     });
+
     // Generic tab component
     const GenericTab = defineComponent({
       props: ['tab'],
@@ -615,8 +697,70 @@
       </div>`
     });
 
-    createApp({
-      components: { AboutTab, SettingsTab, GenericTab },
+    // Utility: trim file name for tab
+    function trimFileName(name, maxLen = 18) {
+      if (name.length <= maxLen) return name;
+      const ext = name.includes('.') ? '.' + name.split('.').pop() : '';
+      return name.slice(0, maxLen - ext.length - 3) + '...' + ext;
+    }
+    // Utility: parse preview-allowed.cfg
+    async function fetchPreviewAllowed() {
+      try {
+      const resp = await fetch('/preview-allowed.cfg', { cache: 'reload' });
+        const text = await resp.text();
+        const textExts = [];
+        const imageExts = [];
+        let group = '';
+        text.split(/\r?\n/).forEach(line => {
+          line = line.trim();
+          if (!line || line.startsWith('#')) return;
+          if (line === '[text]') group = 'text';
+          else if (line === '[image]') group = 'image';
+          else if (group === 'text') textExts.push(line.toLowerCase());
+          else if (group === 'image') imageExts.push(line.toLowerCase());
+        });
+        // Defensive: always return arrays
+        return { textExts: Array.isArray(textExts) ? textExts : [], imageExts: Array.isArray(imageExts) ? imageExts : [] };
+      } catch (e) {
+        return { textExts: [], imageExts: [] };
+      }
+    }
+
+    // Preview tab for text
+    const PreviewTextTab = defineComponent({
+      props: ['tab'],
+      template: `
+        <div>
+          <div style="font-weight:bold;font-size:1.1em;margin-bottom:12px;">{{ tab.title }}</div>
+          <div style="white-space:pre-wrap;word-break:break-word;max-width:100%;overflow:auto;">{{ tab.content }}</div>
+        </div>
+      `
+    });
+    // Preview tab for images
+    const PreviewImageTab = defineComponent({
+      props: ['tab'],
+      template: `
+        <div>
+          <div style="font-weight:bold;font-size:1.1em;margin-bottom:12px;">{{ tab.title }}</div>
+          <div style="display:flex;align-items:center;justify-content:center;width:100%;overflow:auto;">
+            <img :src="tab.content" style="max-width:100%;max-height:60vh;object-fit:contain;box-shadow:0 2px 8px #0003;border-radius:8px;" />
+          </div>
+        </div>
+      `
+    });
+    // Preview tab for unsupported files
+    const PreviewUnsupportedTab = defineComponent({
+      props: ['tab'],
+      template: `
+        <div>
+          <div style="font-weight:bold;font-size:1.1em;margin-bottom:12px;">{{ tab.title }}</div>
+          <div style="color:#e74c3c;font-size:1.1em;padding:32px 0;white-space:pre-line;">{{ tab.content }}</div>
+        </div>
+      `
+    });
+
+createApp({
+  components: { AboutTab, SettingsTab, GenericTab, PreviewTextTab, PreviewImageTab, PreviewUnsupportedTab },
       data() {
         return {
           theme: localStorage.getItem('theme') || 'dark',
@@ -803,6 +947,9 @@
           if (!tab) return 'div';
           if (tab.type === 'about') return 'AboutTab';
           if (tab.type === 'settings') return 'SettingsTab';
+          if (tab.type === 'preview-text') return 'PreviewTextTab';
+          if (tab.type === 'preview-image') return 'PreviewImageTab';
+          if (tab.type === 'preview-unsupported') return 'PreviewUnsupportedTab';
           return 'GenericTab';
         },
         onTabSave(tab) {
@@ -875,21 +1022,93 @@
           }
         },
         addFile(file) {
-          const ext = file.name.split('.').pop();
+          // Extract extension, lowercase, no leading dot
+          let ext = '';
+          if (file.name && file.name.includes('.')) {
+            ext = file.name.split('.').pop().toLowerCase();
+          }
           const id = 'file' + Math.random().toString(36).slice(2, 10);
           const reader = new FileReader();
           reader.onload = (evt) => {
+            let content = evt.target.result;
+            let dataUrl = undefined;
+            // If image, store dataUrl
+            if (/^image\//.test(file.type)) {
+              dataUrl = content;
+              content = atob(content.split(',')[1] || '');
+            }
             this.files.push({
               id,
               name: file.name,
               ext,
-              content: evt.target.result
+              content,
+              dataUrl
             });
           };
-          reader.readAsText(file);
+          // If image, read as data URL
+          if (/^image\//.test(file.type)) reader.readAsDataURL(file);
+          else reader.readAsText(file);
+        },
+
+        async previewFile() {
+          if (!this.selectedFile) return;
+          const { textExts, imageExts } = await fetchPreviewAllowed();
+          // Normalize extension: remove leading dot, lowercase
+          let ext = this.selectedFile.ext || '';
+          if (ext.startsWith('.')) ext = ext.slice(1);
+          ext = ext.toLowerCase();
+          // Defensive: if no ext, try to extract from name
+          if (!ext && this.selectedFile.name && this.selectedFile.name.includes('.')) {
+            ext = this.selectedFile.name.split('.').pop().toLowerCase();
+          }
+          const isText = textExts.includes(ext);
+          const isImage = imageExts.includes(ext);
+          let tabTitle = trimFileName(this.selectedFile.name);
+          if (isText) {
+            this.createTab(tabTitle, 'preview-text', this.selectedFile.content);
+          } else if (isImage) {
+            // For images, pass a data URL
+            let dataUrl = '';
+            if (this.selectedFile.dataUrl) dataUrl = this.selectedFile.dataUrl;
+            else if (this.selectedFile.content.startsWith('data:')) {
+              dataUrl = this.selectedFile.content;
+            } else {
+              // Try to guess mime type
+              let mime = 'image/' + (ext === 'jpg' ? 'jpeg' : ext);
+              dataUrl = `data:${mime};base64,` + btoa(this.selectedFile.content);
+            }
+            this.createTab(tabTitle, 'preview-image', dataUrl);
+          } else {
+            this.createTab(tabTitle, 'preview-unsupported', `Preview not supported for .${ext} files.\nAllowed text: ${textExts.join(', ')}\nAllowed images: ${imageExts.join(', ')}`);
+          }
         },
         selectFile(file) {
           this.selectedFile = file;
+        },
+        saveFile() {
+          if (!this.selectedFile) return;
+          
+          // Create a blob with the file content
+          const blob = new Blob([this.selectedFile.content], { type: 'text/plain' });
+          
+          // Create a temporary URL for the blob
+          const url = URL.createObjectURL(blob);
+          
+          // Create a temporary anchor element to trigger the download
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = this.selectedFile.name;
+          
+          // Trigger the download
+          document.body.appendChild(a);
+          a.click();
+          
+          // Clean up
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          // Show success message
+          window.alert(`File '${this.selectedFile.name}' has been saved!`);
         },
         deleteFile() {
           if (!this.selectedFile) return;
