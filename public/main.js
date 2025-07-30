@@ -44,6 +44,7 @@ const appOptions = {
       nextTabId: 1,
       files: [],
       selectedFile: null,
+      selectedFiles: [],
       orderMenuOpen: false,
       sidebarCollapsed: false,
       sidebarWidth: 220,
@@ -403,81 +404,114 @@ const appOptions = {
     },
 
     async previewFile() {
-      if (!this.selectedFile) return;
+      if (!this.selectedFiles.length) return;
       const { textExts, imageExts } = await fetchPreviewAllowed();
-      // Normalize extension: remove leading dot, lowercase
-      let ext = this.selectedFile.ext || '';
-      if (ext.startsWith('.')) ext = ext.slice(1);
-      ext = ext.toLowerCase();
-      // Defensive: if no ext, try to extract from name
-      if (!ext && this.selectedFile.name && this.selectedFile.name.includes('.')) {
-        ext = this.selectedFile.name.split('.').pop().toLowerCase();
-      }
-      const isText = textExts.includes(ext);
-      const isImage = imageExts.includes(ext);
-      let tabTitle = trimFileName(this.selectedFile.name);
-      if (isText) {
-        this.createTab(tabTitle, 'preview-text', this.selectedFile.content);
-      } else if (isImage) {
-        // For images, pass a data URL
-        let dataUrl = '';
-        if (this.selectedFile.dataUrl) dataUrl = this.selectedFile.dataUrl;
-        else if (this.selectedFile.content.startsWith('data:')) {
-          dataUrl = this.selectedFile.content;
-        } else {
-          // Try to guess mime type
-          let mime = 'image/' + (ext === 'jpg' ? 'jpeg' : ext);
-          dataUrl = `data:${mime};base64,` + btoa(this.selectedFile.content);
+      for (const file of this.selectedFiles) {
+        let ext = file.ext || '';
+        if (ext.startsWith('.')) ext = ext.slice(1);
+        ext = ext.toLowerCase();
+        if (!ext && file.name && file.name.includes('.')) {
+          ext = file.name.split('.').pop().toLowerCase();
         }
-        this.createTab(tabTitle, 'preview-image', dataUrl);
-      } else {
-        this.createTab(tabTitle, 'preview-unsupported', `Preview not supported for .${ext} files.\nAllowed text: ${textExts.join(', ')}\nAllowed images: ${imageExts.join(', ')}`);
+        const isText = textExts.includes(ext);
+        const isImage = imageExts.includes(ext);
+        let tabTitle = trimFileName(file.name);
+        if (isText) {
+          this.createTab(tabTitle, 'preview-text', file.content);
+        } else if (isImage) {
+          let dataUrl = '';
+          if (file.dataUrl) dataUrl = file.dataUrl;
+          else if (file.content.startsWith('data:')) {
+            dataUrl = file.content;
+          } else {
+            let mime = 'image/' + (ext === 'jpg' ? 'jpeg' : ext);
+            dataUrl = `data:${mime};base64,` + btoa(file.content);
+          }
+          this.createTab(tabTitle, 'preview-image', dataUrl);
+        } else {
+          this.createTab(tabTitle, 'preview-unsupported', `Preview not supported for .${ext} files.\nAllowed text: ${textExts.join(', ')}\nAllowed images: ${imageExts.join(', ')}`);
+        }
       }
     },
-    selectFile(file) {
+    isFileSelected(file) {
+      return this.selectedFiles.some(f => f.id === file.id);
+    },
+    selectFile(file, event) {
+      // If clicking on checkbox, don't change selection here
+      if (event && event.target && event.target.type === 'checkbox') return;
+      // If ctrl/cmd or shift is pressed, toggle selection
+      if (event && (event.ctrlKey || event.metaKey)) {
+        this.toggleFileSelection(file);
+        return;
+      }
+      // If shift is pressed, select range
+      if (event && event.shiftKey && this.selectedFiles.length) {
+        const lastIdx = this.files.findIndex(f => f.id === this.selectedFiles[this.selectedFiles.length-1].id);
+        const currIdx = this.files.findIndex(f => f.id === file.id);
+        if (lastIdx !== -1 && currIdx !== -1) {
+          const [start, end] = [lastIdx, currIdx].sort((a,b)=>a-b);
+          this.selectedFiles = this.files.slice(start, end+1);
+          this.selectedFile = file;
+          return;
+        }
+      }
+      // Otherwise, single select
+      this.selectedFiles = [file];
       this.selectedFile = file;
     },
+    toggleFileSelection(file) {
+      const idx = this.selectedFiles.findIndex(f => f.id === file.id);
+      if (idx === -1) {
+        this.selectedFiles.push(file);
+      } else {
+        this.selectedFiles.splice(idx, 1);
+      }
+      // Always keep selectedFile as the last selected (or null)
+      this.selectedFile = this.selectedFiles.length ? this.selectedFiles[this.selectedFiles.length-1] : null;
+    },
     saveFile() {
-      if (!this.selectedFile) return;
-      // Create a blob with the file content
-      const blob = new Blob([this.selectedFile.content], { type: 'text/plain' });
-      // Create a temporary URL for the blob
-      const url = URL.createObjectURL(blob);
-      // Create a temporary anchor element to trigger the download
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = this.selectedFile.name;
-      // Trigger the download
-      document.body.appendChild(a);
-      a.click();
-      // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      // Show success message
-      window.alert(`File '${this.selectedFile.name}' has been saved!`);
+      if (!this.selectedFiles.length) return;
+      for (const file of this.selectedFiles) {
+        const blob = new Blob([file.content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+      window.alert(`Saved ${this.selectedFiles.length} file(s)!`);
     },
     deleteFile() {
-      if (!this.selectedFile) return;
-      const ok = window.confirm(`Delete file '${this.selectedFile.name}'?`);
+      if (!this.selectedFiles.length) return;
+      const names = this.selectedFiles.map(f => f.name).join(', ');
+      const ok = window.confirm(`Delete file(s): ${names}?`);
       if (ok) {
-        this.files = this.files.filter(f => f.id !== this.selectedFile.id);
+        const ids = this.selectedFiles.map(f => f.id);
+        this.files = this.files.filter(f => !ids.includes(f.id));
+        this.selectedFiles = [];
         this.selectedFile = null;
       }
     },
     renameFile() {
-      if (!this.selectedFile) return;
-      const newName = window.prompt('Rename file:', this.selectedFile.name);
-      if (newName && newName !== this.selectedFile.name) {
-        this.selectedFile.name = newName;
-        this.selectedFile.ext = newName.split('.').pop();
+      if (this.selectedFiles.length !== 1) return;
+      const file = this.selectedFiles[0];
+      const newName = window.prompt('Rename file:', file.name);
+      if (newName && newName !== file.name) {
+        file.name = newName;
+        file.ext = newName.split('.').pop();
       }
     },
     duplicateFile() {
-      if (!this.selectedFile) return;
-      const copy = { ...this.selectedFile };
-      copy.id = 'file' + Math.random().toString(36).slice(2, 10);
-      copy.name = this.selectedFile.name.replace(/(\.[^.]*)?$/, '_copy$1');
-      this.files.push(copy);
+      if (!this.selectedFiles.length) return;
+      for (const file of this.selectedFiles) {
+        const copy = { ...file };
+        copy.id = 'file' + Math.random().toString(36).slice(2, 10);
+        copy.name = file.name.replace(/(\.[^.]*)?$/, '_copy$1');
+        this.files.push(copy);
+      }
     },
     toggleOrderMenu() {
       this.orderMenuOpen = !this.orderMenuOpen;
