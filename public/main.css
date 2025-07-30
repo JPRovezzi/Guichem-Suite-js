@@ -513,7 +513,7 @@ body.light .scrollable-tab-content::-webkit-scrollbar-thumb:hover {
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
-  font-size: 0.8em;
+  font-size: 0.5em;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
