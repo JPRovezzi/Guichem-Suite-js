@@ -46,6 +46,8 @@ const appOptions = {
       selectedFile: null,
       orderMenuOpen: false,
       sidebarCollapsed: false,
+      sidebarWidth: 220,
+      sidebarWidthInput: 220,
     }
   },
   computed: {
@@ -75,12 +77,76 @@ const appOptions = {
   },
   methods: {
     noop() {},
+    startSidebarResize(e) {
+      if (this.sidebarCollapsed) return;
+      const sidebar = this.$refs.sidebar;
+      if (!sidebar) return;
+      const startX = e.clientX;
+      const startWidth = sidebar.offsetWidth;
+      const minWidth = 200;
+      const maxWidth = 600;
+      const onMouseMove = (moveEvent) => {
+        let newWidth = startWidth + (moveEvent.clientX - startX);
+        newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+        this.sidebarWidth = newWidth;
+        sidebar.style.width = newWidth + 'px';
+        sidebar.style.minWidth = newWidth + 'px';
+        const toggle = document.querySelector('.sidebar-toggle');
+        if (toggle) {
+          toggle.style.left = newWidth + 'px';
+        }
+      };
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    },
     toggleSidebar() {
       this.sidebarCollapsed = !this.sidebarCollapsed;
+      const sidebar = document.querySelector('.sidebar');
+      const toggle = document.querySelector('.sidebar-toggle');
+      if (this.sidebarCollapsed) {
+        if (sidebar) {
+          sidebar.style.width = '0px';
+          sidebar.style.minWidth = '0px';
+        }
+        if (toggle) toggle.style.left = '0px';
+      } else {
+        this.sidebarWidth = 200;
+        if (sidebar) {
+          sidebar.style.width = '200px';
+          sidebar.style.minWidth = '200px';
+        }
+        if (toggle) toggle.style.left = '200px';
+      }
+    },
+    setSidebarWidth() {
+      // Clamp value
+      let val = parseInt(this.sidebarWidthInput, 10);
+      if (isNaN(val)) val = 220;
+      val = Math.max(200, Math.min(600, val));
+      this.sidebarWidth = val;
+      this.sidebarWidthInput = val;
+      // Set CSS variable or directly style
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) {
+        sidebar.style.width = val + 'px';
+        sidebar.style.minWidth = val + 'px';
+      }
+      // Always move toggle button
+      const toggle = document.querySelector('.sidebar-toggle');
+      if (toggle) {
+        toggle.style.left = this.sidebarCollapsed ? '0px' : val + 'px';
+      }
     },
     toggleTheme() {
       this.theme = this.theme === 'dark' ? 'light' : 'dark';
-    },
+  },
+  watch: {
+    // No longer needed: handled in toggleSidebar
+  },
     toggleHelpMenu() {
       this.helpMenuOpen = !this.helpMenuOpen;
       this.fileMenuOpen = false;

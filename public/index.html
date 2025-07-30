@@ -51,10 +51,11 @@
       <!-- Main content area with sidebar and content -->
       <div class="flex-main-content">
         <!-- Sidebar -->
-        <div class="sidebar" :class="{collapsed: sidebarCollapsed}">
+        <div class="sidebar" :class="{collapsed: sidebarCollapsed}" ref="sidebar">
           <button class="sidebar-toggle" @click="toggleSidebar" :title="sidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar'">
             {{ sidebarCollapsed ? '◀' : '▶' }}
           </button>
+          <div class="sidebar-resize-handle" v-if="!sidebarCollapsed" @mousedown="startSidebarResize"></div>
           <div class="sidebar-bar">
             <div class="sidebar-bar-row">
               <button @click="saveFile" :disabled="!selectedFile" title="Save File">
