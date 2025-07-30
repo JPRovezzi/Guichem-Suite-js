@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Guichem Suite Web</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <link rel="stylesheet" href="main.css">
 </head>
@@ -21,7 +21,7 @@
         <div class="menu">
           <div class="inline-block-rel">
             <button @click.stop="toggleFileMenu">File</button>
-            <div class="dropdown-menu" :class="{show: fileMenuOpen}" @click.stop>
+            <div class="dropdown-menu" :class="[ {show: fileMenuOpen}, {light: theme === 'light'} ]" @click.stop>
               <button @click="fileAction('New')">New</button>
               <button @click="fileAction('Open')">Open</button>
               <button @click="fileAction('Save')">Save</button>
@@ -36,7 +36,7 @@
           <button @click="noop">View</button>
           <div class="inline-block-rel">
             <button id="helpBtn" @click.stop="toggleHelpMenu">Help</button>
-            <div id="helpMenu" class="help-menu" :style="{display: helpMenuOpen ? 'block' : 'none'}" @click.stop>
+            <div id="helpMenu" class="help-menu" :class="{light: theme === 'light'}" :style="{display: helpMenuOpen ? 'block' : 'none'}" @click.stop>
               <div class="margin-bottom-8">
                   <a href="https://example.com/user-manual" target="_blank" rel="noopener">User Manual</a>
                 </div>

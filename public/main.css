@@ -1,3 +1,31 @@
+.dropdown-menu.light {
+  background: #f5f5f5;
+  color: #222;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.dropdown-menu.light button {
+  color: #222;
+}
+.dropdown-menu.light button:hover {
+  background: #e0e0e0;
+}
+.dropdown-menu.light .dropdown-separator {
+  background: #ccc;
+}
+.help-menu.light {
+  background: #f5f5f5;
+  color: #222;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.help-menu.light a, .help-menu.light button {
+  color: #43cea2;
+}
+.help-menu.light a:hover, .help-menu.light button:hover {
+  background: #e0e0e0;
+  text-decoration: underline;
+}
 .sidebar-resize-handle {
   position: absolute;
   top: 0;
