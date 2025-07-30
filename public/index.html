@@ -153,25 +153,8 @@
   <script>
     const { createApp, defineComponent } = Vue;
 
-    // Dummy About tab component
-    const AboutTab = defineComponent({
-      props: ['tab'],
-      template: `<div>About this app: version 1.0.0</div>`
-    });
-    // Dummy Settings tab component
-    const SettingsTab = defineComponent({
-      props: ['tab'],
-      template: `<div>Settings tab (dummy content)</div>`
-    });
-
-    // Generic tab component
-    const GenericTab = defineComponent({
-      props: ['tab'],
-      emits: ['save'],
-      template: `<div>
-        <div>{{ tab.content }}</div>
-      </div>`
-    });
+    // AboutTab will be loaded from AboutTab.js
+    // All tab components will be loaded from separate files
 
     // Utility: trim file name for tab
     function trimFileName(name, maxLen = 18) {
@@ -202,41 +185,10 @@
       }
     }
 
-    // Preview tab for text
-    const PreviewTextTab = defineComponent({
-      props: ['tab'],
-      template: `
-        <div>
-          <div class="font-bold font-1-1em margin-bottom-12">{{ tab.title }}</div>
-          <div class="white-space-pre-wrap word-break-break-word max-width-100 overflow-auto">{{ tab.content }}</div>
-        </div>
-      `
-    });
-    // Preview tab for images
-    const PreviewImageTab = defineComponent({
-      props: ['tab'],
-      template: `
-        <div>
-          <div class="font-bold font-1-1em margin-bottom-12">{{ tab.title }}</div>
-          <div class="display-flex align-center justify-center max-width-100 overflow-auto">
-            <img :src="tab.content" class="max-width-100 max-height-60vh object-fit-contain box-shadow-img border-radius-8" />
-          </div>
-        </div>
-      `
-    });
-    // Preview tab for unsupported files
-    const PreviewUnsupportedTab = defineComponent({
-      props: ['tab'],
-      template: `
-        <div>
-          <div class="font-bold font-1-1em margin-bottom-12">{{ tab.title }}</div>
-          <div class="color-e74c3c font-1-1em padding-32-0 white-space-pre-line">{{ tab.content }}</div>
-        </div>
-      `
-    });
 
-createApp({
-  components: { AboutTab, SettingsTab, GenericTab, PreviewTextTab, PreviewImageTab, PreviewUnsupportedTab },
+
+const appOptions = {
+  components: {},
       data() {
         return {
           theme: localStorage.getItem('theme') || 'dark',
@@ -625,7 +577,25 @@ createApp({
           this.orderMenuOpen = false;
         },
       }
-    }).mount('#app');
+    }
+
+// Dynamically import all tab components and register them, then mount the app
+Promise.all([
+  import('./AboutTab.js'),
+  import('./SettingsTab.js'),
+  import('./GenericTab.js'),
+  import('./PreviewTextTab.js'),
+  import('./PreviewImageTab.js'),
+  import('./PreviewUnsupportedTab.js')
+]).then(([AboutTab, SettingsTab, GenericTab, PreviewTextTab, PreviewImageTab, PreviewUnsupportedTab]) => {
+  appOptions.components.AboutTab = AboutTab.default;
+  appOptions.components.SettingsTab = SettingsTab.default;
+  appOptions.components.GenericTab = GenericTab.default;
+  appOptions.components.PreviewTextTab = PreviewTextTab.default;
+  appOptions.components.PreviewImageTab = PreviewImageTab.default;
+  appOptions.components.PreviewUnsupportedTab = PreviewUnsupportedTab.default;
+  Vue.createApp(appOptions).mount('#app');
+});
   </script>
 </body>
 </html>

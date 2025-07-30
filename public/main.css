@@ -547,8 +547,9 @@ body.light .sidebar-files::-webkit-scrollbar-thumb:hover {
   border-radius: 4px;
   margin: 2px 4px;
   transition: background 0.2s;
-  user-select: none;
   -webkit-user-select: none;
+  user-select: none;
+
 }
 .sidebar-file.selected {
   background: #4ecdc4;
