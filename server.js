@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = 3001;
-const TOOLS_JSON = path.join(__dirname, 'public', 'addons', 'apps', 'tools.json');
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -30,23 +30,7 @@ app.get('/api/available-tools', (req, res) => {
   });
 });
 
-// Get the current tools.json
-app.get('/api/tools', (req, res) => {
-  fs.readFile(TOOLS_JSON, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Failed to read tools.json' });
-    res.json(JSON.parse(data));
-  });
-});
 
-// Update tools.json
-app.post('/api/tools', (req, res) => {
-  const { tools } = req.body;
-  if (!Array.isArray(tools)) return res.status(400).json({ error: 'Invalid tools array' });
-  fs.writeFile(TOOLS_JSON, JSON.stringify({ tools }, null, 2), err => {
-    if (err) return res.status(500).json({ error: 'Failed to write tools.json' });
-    res.json({ success: true });
-  });
-});
 
 app.listen(PORT, () => {
   console.log(`Backend API running at http://localhost:${PORT}`);
