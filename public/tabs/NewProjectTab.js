@@ -41,6 +41,14 @@ export default {
           if (!resp.ok) continue;
           const tool = await resp.json();
           tool.folder = folder;
+          // Map name and description from nested TOOL object if present
+          if (tool.TOOL) {
+            tool.name = tool.TOOL.NAME || folder;
+            tool.description = tool.TOOL.DESCRIPTION || '';
+          } else {
+            tool.name = folder;
+            tool.description = '';
+          }
           tools.push(tool);
         } catch (e) {
           // Ignore
