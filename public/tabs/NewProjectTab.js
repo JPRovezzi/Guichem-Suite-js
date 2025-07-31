@@ -3,6 +3,7 @@
 export default {
   name: 'NewProjectTab',
   noConfirmClose: true,
+  props: ['tab'],
   data() {
     return {
       tools: [],
@@ -48,12 +49,11 @@ export default {
     },
     startTool() {
       if (!this.selectedTool) return;
-      this.$emit('tab-event', { type: 'startTool', tool: this.selectedTool }, this.$parent.tab.id);
+      this.$emit('tab-event', { type: 'startTool', tool: this.selectedTool }, this.tab && this.tab.id);
     },
     cancel() {
-      // Use the parent's tab.id, which is always present in this app's structure
-      let tabId = this.$parent && this.$parent.tab && this.$parent.tab.id;
-      this.$emit('tab-event', { type: 'cancel' }, tabId);
+      // Emit the cancel event so the parent can close the tab
+      this.$emit('cancel');
     },
     toggleHelp(idx) {
       this.showHelp = this.showHelp === idx ? null : idx;
