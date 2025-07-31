@@ -70,8 +70,6 @@ export default {
   template: `
     <div class="new-project-tab">
       <h2>Start a New Project</h2>
-      <button @click="loadTools" style="margin-bottom: 12px; float: right;">🔄 Refresh Addons</button>
-      <div style="clear: both;"></div>
       <div v-if="loading">Loading tools...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       <div v-else>
@@ -93,11 +91,13 @@ export default {
             <div v-if="showHelp === idx" class="help-popup">{{ tool.description || 'No description.' }}</div>
           </li>
         </ul>
-        <div class="actions">
-          <button :disabled="!selectedTool" @click="startTool">Start</button>
-          <button @click="cancel">Cancel</button>
+        <div class="actions" style="display: flex; justify-content: center; gap: 18px; margin-top: 32px;">
+          <button :disabled="!selectedTool" @click="startTool" class="themed-btn">Start</button>
+          <button @click="cancel" class="themed-btn">Cancel</button>
+          <button @click="loadTools" class="themed-btn">🔄 Refresh Addons</button>
         </div>
       </div>
     </div>
-  `
+  `,
+  // ...existing code...
 }

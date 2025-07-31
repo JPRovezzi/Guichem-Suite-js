@@ -1,3 +1,44 @@
+/* NewProjectTab themed button styles (theme-aware) */
+.new-project-tab .themed-btn {
+  padding: 0.6em 1.5em;
+  border-radius: 6px;
+  border: 1.5px solid #3498db;
+  font-size: 1.1em;
+  margin: 0 8px;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(52,152,219,0.07);
+  background: #232323;
+  color: #fff;
+  font-weight: 500;
+}
+.new-project-tab .themed-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #191919;
+  color: #888;
+  border-color: #333;
+}
+.new-project-tab .themed-btn:hover:not(:disabled) {
+  background: #3498db;
+  color: #fff;
+  border-color: #2176bd;
+}
+body.light .new-project-tab .themed-btn {
+  background: #f5f5f5;
+  color: #222;
+  border-color: #b5c6d6;
+}
+body.light .new-project-tab .themed-btn:disabled {
+  background: #eee;
+  color: #aaa;
+  border-color: #ccc;
+}
+body.light .new-project-tab .themed-btn:hover:not(:disabled) {
+  background: #43cea2;
+  color: #fff;
+  border-color: #43cea2;
+}
 .dropdown-menu.light {
   background: #f5f5f5;
   color: #222;
