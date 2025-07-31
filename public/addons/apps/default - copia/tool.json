@@ -1,0 +1,23 @@
+{
+    "TOOL":{
+        "NAME": "default2",
+        "DESCRIPTION": "",
+        "VERSION": "1.0",
+        "AUTHOR": "Juan Pablo Rovezzi",
+        "WEBSITE": "",
+        "LICENSE": "",
+        "REQUIREMENTS": {
+            "OS": "Windows, Linux",
+            "SOFTWARE": ">= Python 3.6, < Python 3.12",
+            "LIBRARIES": "nistchempy,tqdm"
+        },
+        "AKNOWLEDGEMENTS": ""
+    },
+
+    "FILENAME":{
+        
+    },
+    "PATH":{
+        
+    }
+}

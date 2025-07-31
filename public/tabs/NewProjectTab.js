@@ -19,9 +19,21 @@ export default {
   },
   methods: {
     async loadTools() {
-      // Try to discover all tool folders by fetching a manifest, or fallback to hardcoded list
-      // For now, try to fetch /addons/apps/default/tool.json and log the result
-      const toolFolders = ['default'];
+      this.loading = true;
+      this.error = '';
+      let toolFolders = ['default'];
+      // Try to fetch the manifest
+      try {
+        const manifestResp = await fetch('/addons/apps/tools.json?_=' + Date.now());
+        if (manifestResp.ok) {
+          const manifest = await manifestResp.json();
+          if (manifest && Array.isArray(manifest.tools)) {
+            toolFolders = manifest.tools;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load tools.json manifest:', e);
+      }
       const tools = [];
       for (const folder of toolFolders) {
         const url = `/addons/apps/${folder}/tool.json`;
@@ -62,6 +74,8 @@ export default {
   template: `
     <div class="new-project-tab">
       <h2>Start a New Project</h2>
+      <button @click="loadTools" style="margin-bottom: 12px; float: right;">🔄 Refresh Addons</button>
+      <div style="clear: both;"></div>
       <div v-if="loading">Loading tools...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       <div v-else>
