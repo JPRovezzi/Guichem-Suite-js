@@ -1,3 +1,4 @@
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -10,6 +11,24 @@ const TOOLS_JSON = path.join(__dirname, 'public', 'addons', 'apps', 'tools.json'
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Endpoint to list all tool folders containing tool.json
+app.get('/api/available-tools', (req, res) => {
+  const appsDir = path.join(__dirname, 'public', 'addons', 'apps');
+  fs.readdir(appsDir, { withFileTypes: true }, (err, entries) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to read apps directory.' });
+    }
+    const folders = entries
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .filter(folder => {
+        const toolJson = path.join(appsDir, folder, 'tool.json');
+        return fs.existsSync(toolJson);
+      });
+    res.json({ folders });
+  });
+});
 
 // Get the current tools.json
 app.get('/api/tools', (req, res) => {

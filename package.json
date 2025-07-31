@@ -30,6 +30,7 @@
     "escape-html": "^1.0.3",
     "etag": "^1.8.1",
     "express": "^5.1.0",
+    "cors": "^2.8.5",
     "finalhandler": "^2.1.0",
     "follow-redirects": "^1.15.9",
     "form-data": "^4.0.3",
@@ -79,10 +80,17 @@
     "type-is": "^2.0.1",
     "unpipe": "^1.0.0",
     "vary": "^1.1.2",
-    "wrappy": "^1.0.2"
+    "wrappy": "^1.0.2",
+    "concurrently": "^8.2.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-server": "node server.js",
+    "start-page": "npx serve ./public -l 5000",
+    "start": "concurrently \"npm run start-server\" \"npm run start-page\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   },
   "keywords": [],
   "author": "",
