@@ -1,4 +1,3 @@
-  // ...existing code...
 // main.js
 
 // Utility: trim file name for tab
@@ -81,12 +80,40 @@ const appOptions = {
   },
   // previewAllowedCache is now in data()
   methods: {
+    handleNewProjectTabEvent(event, tabId) {
+      if (event.type === 'startTool') {
+        // Rename tab and load tool's welcome frame (for now, just show tool name)
+        const tab = this.tabs.find(t => t.id === tabId);
+        if (tab) {
+          tab.title = event.tool.name;
+          tab.type = 'generic';
+          tab.content = `Welcome to ${event.tool.name}!`;
+        }
+      } else if (event.type === 'cancel') {
+        // Close the tab
+        this.closeTab(tabId);
+      }
+    },
     async ensurePreviewAllowed() {
       if (!this.previewAllowedCache.loaded) {
         const cfg = await fetchPreviewAllowed();
         this.previewAllowedCache.textExts = cfg.textExts;
         this.previewAllowedCache.imageExts = cfg.imageExts;
         this.previewAllowedCache.loaded = true;
+      }
+    },
+    handleNewProjectTabEvent(event, tabId) {
+      if (event.type === 'startTool') {
+        // Rename tab and load tool's welcome frame (for now, just show tool name)
+        const tab = this.tabs.find(t => t.id === tabId);
+        if (tab) {
+          tab.title = event.tool.name;
+          tab.type = 'generic';
+          tab.content = `Welcome to ${event.tool.name}!`;
+        }
+      } else if (event.type === 'cancel') {
+        // Close the tab
+        this.closeTab(tabId);
       }
     },
     fileIcon(file) {
@@ -206,21 +233,12 @@ const appOptions = {
     async fileAction(action) {
       const tab = this.activeTabObj;
       if (action === 'New') {
-        if (!tab) {
-          this.createTab('Untitled', 'generic', 'New tab content');
-        } else {
-          const comp = this.$options.components[this.tabComponent(tab)];
-          const replace = comp && comp.noConfirmClose
-            ? true
-            : window.confirm(`Replace current tab ('${tab.title}') with a new one? (Cancel to create a new tab)`);
-          if (replace) {
-            tab.title = 'Untitled';
-            tab.type = 'generic';
-            tab.content = 'New tab content';
-          } else {
-            this.createTab('Untitled', 'generic', 'New tab content');
-          }
-        }
+        // Always open a new tab of type 'new-project' for the tool selection menu
+        const id = 'tab' + this.nextTabId++;
+        const newTab = { id, title: 'New project', type: 'new-project', content: null };
+        this.tabs.push(newTab);
+        this.activeTab = id;
+        return;
       } else if (action === 'Open') {
         if (!tab) {
           const fileName = window.prompt('Enter file name to open:', 'file.txt');
@@ -343,6 +361,7 @@ const appOptions = {
       if (tab.type === 'preview-text') return 'PreviewTextTab';
       if (tab.type === 'preview-image') return 'PreviewImageTab';
       if (tab.type === 'preview-unsupported') return 'PreviewUnsupportedTab';
+      if (tab.type === 'new-project') return 'NewProjectTab';
       return 'GenericTab';
     },
     onTabSave(tab) {
@@ -578,13 +597,15 @@ Promise.all([
   import('./tabs/GenericTab.js'),
   import('./tabs/PreviewTextTab.js'),
   import('./tabs/PreviewImageTab.js'),
-  import('./tabs/PreviewUnsupportedTab.js')
-]).then(([AboutTab, SettingsTab, GenericTab, PreviewTextTab, PreviewImageTab, PreviewUnsupportedTab]) => {
+  import('./tabs/PreviewUnsupportedTab.js'),
+  import('./tabs/NewProjectTab.js')
+]).then(([AboutTab, SettingsTab, GenericTab, PreviewTextTab, PreviewImageTab, PreviewUnsupportedTab, NewProjectTab]) => {
   appOptions.components.AboutTab = AboutTab.default;
   appOptions.components.SettingsTab = SettingsTab.default;
   appOptions.components.GenericTab = GenericTab.default;
   appOptions.components.PreviewTextTab = PreviewTextTab.default;
   appOptions.components.PreviewImageTab = PreviewImageTab.default;
   appOptions.components.PreviewUnsupportedTab = PreviewUnsupportedTab.default;
+  appOptions.components.NewProjectTab = NewProjectTab.default;
   Vue.createApp(appOptions).mount('#app');
 });

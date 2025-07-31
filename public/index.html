@@ -145,7 +145,13 @@
           </div>
           <!-- Tab Content or No Tabs Message -->
           <div v-if="tabs.length" class="tab-content scrollable-tab-content" :class="{light: theme === 'light'}">
-            <component :is="tabComponent(activeTabObj)" :tab="activeTabObj" @save="onTabSave" />
+            <component
+              :is="tabComponent(activeTabObj)"
+              :tab="activeTabObj"
+              @save="onTabSave"
+              @startTool="e => handleNewProjectTabEvent({type: 'startTool', tool: e}, activeTabObj.id)"
+              @cancel="() => handleNewProjectTabEvent({type: 'cancel'}, activeTabObj.id)"
+            />
           </div>
           <div v-else class="no-tabs-message">
             No tabs open.
